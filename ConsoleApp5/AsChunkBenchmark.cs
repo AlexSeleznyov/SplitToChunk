@@ -54,7 +54,7 @@ namespace ConsoleApp5
 
             int sum = 0;
 
-            foreach (var chunk in arr.GroupBy(idx => idx / ChunkSize).Select(_=>_.ToArray()))
+            foreach (var chunk in arr.GroupBy(idx => idx / ChunkSize).Select(_ => _.ToArray()))
             {
                 Array.ForEach(chunk, _ => sum += _);
             }
@@ -68,7 +68,50 @@ namespace ConsoleApp5
 
             int sum = 0;
 
-            foreach (var chunk in arr.GroupBy(idx => idx / ChunkSize).Select(_=>_.ToArray()))
+            foreach (var chunk in arr.GroupBy(idx => idx / ChunkSize).Select(_ => _.ToArray()))
+            {
+                Array.ForEach(chunk, _ => sum += _);
+            }
+            return sum;
+        }
+        [Benchmark]
+        public int TestSO_Markus()
+        {
+            var arr = GetTestData();
+
+            int sum = 0;
+
+            foreach (var chunk in arr.Batch(ChunkSize))
+            {
+                var array = chunk.ToArray();
+                Array.ForEach(array, _ => sum += _);
+            }
+            return sum;
+        }
+
+        [Benchmark]
+        public int TestSO_mjwills()
+        {
+            var arr = GetTestData();
+
+            int sum = 0;
+
+            foreach (var chunk in arr.Partition(ChunkSize))
+            {
+                var array = chunk.ToArray();
+                Array.ForEach(array, _ => sum += _);
+            }
+            return sum;
+        }
+
+        [Benchmark]
+        public int TestSO_InBetween()
+        {
+            var arr = GetTestData();
+
+            int sum = 0;
+
+            foreach (var chunk in arr.AsChunks_ByInbetween(ChunkSize))
             {
                 Array.ForEach(chunk, _ => sum += _);
             }

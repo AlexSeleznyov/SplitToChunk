@@ -2,6 +2,7 @@
 //
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ConsoleApp5
 {
@@ -58,6 +59,79 @@ namespace ConsoleApp5
                 Array.Resize(ref arr, pos);
                 yield return arr;
             }
+        }
+
+        /// <summary>
+        /// StackOverflow implementation
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="batchSize"></param>
+        /// <returns></returns>
+        public static IEnumerable<IEnumerable<T>> Batch<T>(this IEnumerable<T> source, int batchSize)
+        {
+            if (batchSize <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(batchSize));
+            }
+            using (var enumerator = source.GetEnumerator())
+            {
+                while (enumerator.MoveNext())
+                {
+                    yield return YieldBatchElements(enumerator, batchSize - 1);
+                }
+            }
+        }
+
+        private static IEnumerable<T> YieldBatchElements<T>(IEnumerator<T> source, int batchSize)
+        {
+            yield return source.Current;
+            for (var i = 0; i < batchSize && source.MoveNext(); i++)
+            {
+                yield return source.Current;
+            }
+        }
+
+        public static IEnumerable<T[]> AsChunks_ByInbetween<T>(
+            this T[] source, int chunkMaxSize)
+        {
+            var chunks = source.Length / chunkMaxSize;
+            var leftOver = source.Length % chunkMaxSize;
+            var result = new List<T[]>(chunks + 1);
+            var offset = 0;
+
+            for (var i = 0; i < chunks; i++)
+            {
+                result.Add(new ArraySegment<T>(source,
+                    offset,
+                    chunkMaxSize).ToArray());
+                offset += chunkMaxSize;
+            }
+
+            if (leftOver > 0)
+            {
+                result.Add(new ArraySegment<T>(source,
+                    offset,
+                    leftOver).ToArray());
+            }
+
+            return result;
+        }
+
+        public static IEnumerable<IEnumerable<T>> Partition<T>(this IEnumerable<T> items, int partitionSize)
+        {
+            List<T> partition = new List<T>(partitionSize);
+            foreach (T item in items)
+            {
+                partition.Add(item);
+                if (partition.Count == partitionSize)
+                {
+                    yield return partition;
+                    partition = new List<T>(partitionSize);
+                }
+            }
+            // Cope with items.Count % partitionSize != 0
+            if (partition.Count > 0) yield return partition;
         }
     }
 }
