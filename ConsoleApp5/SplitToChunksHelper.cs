@@ -118,6 +118,32 @@ namespace ConsoleApp5
             return result;
         }
 
+        public static IEnumerable<IList<T>> AsChunks_ByInbetween2<T>(
+            this T[] source, int chunkMaxSize)
+        {
+            var chunks = source.Length / chunkMaxSize;
+            var leftOver = source.Length % chunkMaxSize;
+            var result = new List<IList<T>>(chunks + 1);
+            var offset = 0;
+
+            for (var i = 0; i < chunks; i++)
+            {
+                result.Add(new ArraySegment<T>(source,
+                    offset,
+                    chunkMaxSize));
+                offset += chunkMaxSize;
+            }
+
+            if (leftOver > 0)
+            {
+                result.Add(new ArraySegment<T>(source,
+                    offset,
+                    leftOver));
+            }
+
+            return result;
+        }
+
         public static IEnumerable<IEnumerable<T>> Partition<T>(this IEnumerable<T> items, int partitionSize)
         {
             List<T> partition = new List<T>(partitionSize);

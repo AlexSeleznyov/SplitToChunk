@@ -117,5 +117,22 @@ namespace ConsoleApp5
             }
             return sum;
         }
+
+        [Benchmark]
+        public int TestSO_InBetween2()
+        {
+            var arr = GetTestData();
+
+            int sum = 0;
+
+            foreach (var chunk in arr.AsChunks_ByInbetween2(ChunkSize))
+            {
+                for (int i = 0; i < chunk.Count; i++)
+                {
+                    sum += chunk[i];
+                }
+            }
+            return sum;
+        }
     }
 }
